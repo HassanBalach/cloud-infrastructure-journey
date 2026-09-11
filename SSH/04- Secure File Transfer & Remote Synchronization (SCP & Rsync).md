@@ -64,6 +64,12 @@ Upload Assets to Remote Web Server:
 rsync -avz ./dist/ aws:/home/ubuntu/
 ```
 
+Upload Assets from Remote Server to local machine:
+
+```bash
+rsync -avz aws:/home/ubuntu/filename.txt . 
+```
+
 Connect to Instance via SSH Alias:
 
 ```bash
@@ -75,6 +81,7 @@ Verify Uploaded Files:
 ls -la /home/ubuntu/
 ```
 
+# NOTE
 ```bash
 To play with these two commands, open two terminals. One should connect to the SSH AWS Ubuntu server, and the second terminal should be your local Linux command line. Now, try to use these commands to play the game: make directories and files, try to use SCP and rsync, and see what happens in your terminal. You will also see the game of the trailing slash—don't forget it—so you will understand this core concept completely.
 ```
