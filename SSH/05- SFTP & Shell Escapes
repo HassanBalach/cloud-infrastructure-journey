@@ -1,0 +1,254 @@
+# Lesson 05: SFTP & Shell Escapes
+
+SFTP (SSH File Transfer Protocol) can feel confusing at first because it behaves like a **two-sided terminal**.
+
+Unlike commands such as `scp` or `rsync`, which perform a transfer and return you to your normal terminal, `sftp` opens an **interactive session** where you can work with both:
+
+- 🖥️ **Remote machine** → Your AWS EC2 server
+- 💻 **Local machine** → Your laptop/PC
+
+Understanding which machine a command operates on is the most important concept in SFTP.
+
+---
+
+## 🔑 Key Concept: The `l` Rule
+
+Inside an SFTP session, commands without an `l` generally operate on the **remote server**.
+
+Adding an `l` to certain commands makes them operate on your **local machine**.
+
+For example:
+
+```bash
+ls
+```
+
+Lists files on the **remote EC2 server**.
+
+While:
+
+```bash
+lls
+```
+
+Lists files on your **local machine**.
+
+The same idea applies to commands such as:
+
+```text
+cd    → Remote
+lcd   → Local
+
+pwd   → Remote
+lpwd  → Local
+```
+
+---
+
+## 📋 Essential SFTP Commands
+
+| Command | Environment | Description |
+|---|---|---|
+| `ls -l` | Remote | List remote files and directories |
+| `lls -l` | Local | List local files and directories |
+| `cd path/` | Remote | Change the remote working directory |
+| `lcd path/` | Local | Change the local working directory |
+| `pwd` | Remote | Show the remote working directory |
+| `lpwd` | Local | Show the local working directory |
+| `get filename` | Transfer | Download a file: Remote → Local |
+| `get -r folder/` | Transfer | Download a directory recursively |
+| `put filename` | Transfer | Upload a file: Local → Remote |
+| `put -r folder/` | Transfer | Upload a directory recursively |
+| `mkdir folder/` | Remote | Create a remote directory |
+| `rmdir folder/` | Remote | Remove an empty remote directory |
+| `!command` | Local | Execute a local shell command |
+| `exit` | — | Exit the SFTP session |
+
+---
+
+# ⚡ Shell Escapes with `!`
+
+One of the most useful SFTP features is the **local shell escape operator**:
+
+```bash
+!
+```
+
+It allows you to execute a command on your **local machine without leaving the SFTP session**.
+
+For example:
+
+```bash
+sftp> !clear
+```
+
+Clears the local terminal screen.
+
+Another example:
+
+```bash
+sftp> !cat localfile.md
+```
+
+Reads a local file using your normal local shell.
+
+You can think of `!` as:
+
+> **"Run this command locally instead of remotely."**
+
+---
+
+```text
+
+                 SFTP SESSION
+                      │
+          ┌───────────┴───────────┐
+          │                       │
+       REMOTE                    LOCAL
+       AWS EC2                   Your PC
+          │                       │
+      ls, cd, pwd             lls, lcd, lpwd
+          │                       │
+          └───────────┬───────────┘
+                      │
+                !command
+                      ↓
+                  LOCAL SHELL
+
+```
+---
+
+
+
+# Step-by-Step Hands-On Example
+
+Try this exact 7-step walkthrough in your terminal to see how it works in real-time:
+
+
+## 1. Open SFTP Session
+
+Connect using your SSH alias:
+
+```bash
+sftp aws
+```
+Your terminal prompt will change to sftp>.
+
+## 2. Check Where You Are
+```bash
+sftp> pwd
+```
+Remote working directory: /home/ubuntu
+
+```bash
+sftp> lpwd
+```
+
+Local working directory: /home/hassan-balach
+
+## 3. Upload a File (put)
+
+To copy a file from your Local PC $\rightarrow$ Remote AWS:
+```bash
+sftp> put local_file.txt
+```
+(This uploads local_file.txt from your local working directory into /home/ubuntu/ on AWS).
+
+## 4. Download a File (get)
+
+To copy a `file` from Remote AWS $\rightarrow$ Local PC:
+
+```bash
+sftp> get remote_file.txt
+```
+
+## 5. Upload a Folder (put)
+
+To copy a folder from your Local PC $\rightarrow$ Remote AWS:
+```bash
+sftp> put -r newFolder
+```
+(This uploads newFolder from your local working directory into /home/ubuntu/ on AWS).
+
+## 6. Download a Folder ( get + -r ) 
+
+To copy a `folder` from Remote AWS $\rightarrow$ Local PC:
+
+```bash
+sftp> get -r remote_Folder
+```
+
+(This downloads remote_Folder from AWS into your current local folder).
+
+## 7. Exit SFTP
+```bash
+sftp> exit
+```
+---
+
+# 🧠 Quick Mental Model
+
+When working with SFTP, remember this:
+
+```text
+                    SFTP
+                     │
+          ┌──────────┴──────────┐
+          │                     │
+       REMOTE                  LOCAL
+       AWS EC2                 Your PC
+          │                     │
+     ls / cd / pwd        lls / lcd / lpwd
+          │                     │
+          └──────────┬──────────┘
+                     │
+                File Transfer
+                     │
+             ┌───────┴───────┐
+             │               │
+            put             get
+             │               │
+        Local → Remote   Remote → Local
+```
+
+### The commands to remember
+
+```text
+ls       → Remote files
+lls      → Local files
+
+cd       → Remote directory
+lcd      → Local directory
+
+pwd      → Remote location
+lpwd     → Local location
+
+put      → Upload
+get      → Download
+
+put -r   → Upload directory
+get -r   → Download directory
+
+!        → Run local shell command
+
+exit     → Leave SFTP
+```
+
+---
+
+# 🎯 Key Takeaways
+
+By the end of this lesson, you should understand:
+
+- **SFTP creates an interactive file-transfer session.**
+- You work with both a **local machine and a remote machine**.
+- Commands such as `ls`, `cd`, and `pwd` operate on the **remote server**.
+- Commands such as `lls`, `lcd`, and `lpwd` operate on the **local machine**.
+- `put` transfers files **Local → Remote**.
+- `get` transfers files **Remote → Local**.
+- `-r` allows directories to be transferred recursively.
+- `!` lets you execute local shell commands without leaving SFTP.
+- Directory access requires the appropriate Linux permissions, including the **execute (`x`) bit**.
+
+> 💡 **The most important thing to remember:**  
+> **SFTP is not just a file-transfer command — it is an interactive session where you manage both sides of the connection.**
